@@ -13,14 +13,21 @@ There will be a command `gbseqextractor` created under the same directory as you
 ## 3 Usage
 
     $ gbseqextractor
-    usage: gbseqextractor.py [-h] -f <STR> [-prefix <STR>] [-seqPrefix <STR>]
-                             [-types {CDS,rRNA,tRNA,wholeseq} [{CDS,rRNA,tRNA,wholeseq} ...]]
-                             [-gi] [-p] [-t] [-s] [-l] [-rv] [-F]
+    usage: gbseqextractor.py [-h] -f <STR> -prefix <STR> [-seqPrefix <STR>]
+                             [-types {CDS,rRNA,tRNA,wholeseq} [{CDS,rRNA,tRNA,wholeseq} ...]] [-gi] [-p] [-t] [-s] [-l] [-rv]
+                             [-F]
 
-    extract any CDS or rNRA or tRNA DNA sequences of genes from Genbank file.
-    Note: the position on ID line is 0 left-most! Seqid will be the value of
-    '/gene=' or '/product=', if they both were not present, the gene will not be
-    output!
+    Extract any CDS or rNRA or tRNA DNA sequences of genes from Genbank file.
+
+    Seqid will be the value of '/gene=' or '/product=', if they both were not
+    present, the gene will not be output!
+
+    Please cite:
+    Guanliang Meng, Yiyuan Li, Chentao Yang, Shanlin Liu,
+    MitoZ: a toolkit for animal mitochondrial genome assembly, annotation
+    and visualization, Nucleic Acids Research, https://doi.org/10.1093/nar/gkz173
+
+
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -28,26 +35,26 @@ There will be a command `gbseqextractor` created under the same directory as you
       -prefix <STR>         prefix of output file.
       -seqPrefix <STR>      prefix of each seq id. default: None
       -types {CDS,rRNA,tRNA,wholeseq} [{CDS,rRNA,tRNA,wholeseq} ...]
-                            what kind of genes you want to extract? wholeseq for
-                            whole fasta seq.[CDS]
-      -gi                   use gi number as sequence ID instead of accession
-                            number when gi number is present. (default: accession
-                            number)
-      -p                    output the position information on the ID line [False]
+                            what kind of genes you want to extract? wholeseq for whole fasta seq.[CDS]
+      -gi                   use gi number as sequence ID instead of accession number when " gi number is present. (default:
+                            accession number)
+      -p                    output the position information on the ID line. Warning: the position on ID line is 0 left-most!
+                            [False]
       -t                    output the taxonomy lineage on ID line [False]
       -s                    output the species name on the ID line [False]
       -l                    output the seq length on the ID line [False]
-      -rv                   reverse and complement the sequences if the gene is on
-                            minus strand [False]
-      -F                    only output full length genes [False]
-   
+      -rv                   reverse and complement the sequences if the gene is on minus strand [False]
+      -F                    only output full length genes,i.e., exclude the genes with '>' or '<' in their location [False]
+
 ## Author
 Guanliang MENG
 
 ## Citation
 This script is part of the package `MitoZ`, when you use the script in your work, please cite:
-    
-    MitoZ: A toolkit for mitochondrial genome assembly, annotation and visualization with NGS data. Guangliang Meng, Yiyuan Li, Chentao Yang, Shanlin Liu (in manuscript)
+
+    Guanliang Meng, Yiyuan Li, Chentao Yang, Shanlin Liu,
+    MitoZ: a toolkit for animal mitochondrial genome assembly, annotation and visualization, Nucleic Acids Research, https://doi.org/10.1093/nar/gkz173
+
 
 Meanwhile, since `gbseqextractor` makes use of `Biopython`, you should alos cite it if you use `gbseqextractor` in your work:
 
