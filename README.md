@@ -1,5 +1,10 @@
 # gbseqextractor
 
+# updates
+version 20201128:
+        Now we can handle compounlocation (feature location with "join")!
+
+
 ## 1 Introduction
 
 `gbseqextractor` is a tool to extract any CDS or rNRA or tRNA DNA sequences of genes from Genbank file. with `Biopython` (http://www.biopython.org/)
@@ -14,13 +19,20 @@ There will be a command `gbseqextractor` created under the same directory as you
 
     $ gbseqextractor
     usage: gbseqextractor.py [-h] -f <STR> -prefix <STR> [-seqPrefix <STR>]
-                             [-types {CDS,rRNA,tRNA,wholeseq} [{CDS,rRNA,tRNA,wholeseq} ...]] [-gi] [-p] [-t] [-s] [-l] [-rv]
-                             [-F]
+                         [-types {CDS,rRNA,tRNA,wholeseq,gene} [{CDS,rRNA,tRNA,wholeseq,gene} ...]] [-gi] [-p] [-t] [-s]
+                         [-l] [-rv] [-F]
 
     Extract any CDS or rNRA or tRNA DNA sequences of genes from Genbank file.
 
     Seqid will be the value of '/gene=' or '/product=', if they both were not
     present, the gene will not be output!
+
+    version 20201128:
+        Now we can handle compounlocation (feature location with "join")!
+
+    Warning:
+        Each sequence in the result files corresponds to ONE feature
+    in the GenBank file, I will NOT combine multiple CDS of the same gene into ONE!
 
     Please cite:
     Guanliang Meng, Yiyuan Li, Chentao Yang, Shanlin Liu,
@@ -32,9 +44,9 @@ There will be a command `gbseqextractor` created under the same directory as you
     optional arguments:
       -h, --help            show this help message and exit
       -f <STR>              Genbank file
-      -prefix <STR>         prefix of output file.
+      -prefix <STR>         prefix of output file. required.
       -seqPrefix <STR>      prefix of each seq id. default: None
-      -types {CDS,rRNA,tRNA,wholeseq} [{CDS,rRNA,tRNA,wholeseq} ...]
+      -types {CDS,rRNA,tRNA,wholeseq,gene} [{CDS,rRNA,tRNA,wholeseq,gene} ...]
                             what kind of genes you want to extract? wholeseq for whole fasta seq.[CDS]
       -gi                   use gi number as sequence ID instead of accession number when " gi number is present. (default:
                             accession number)
@@ -43,8 +55,9 @@ There will be a command `gbseqextractor` created under the same directory as you
       -t                    output the taxonomy lineage on ID line [False]
       -s                    output the species name on the ID line [False]
       -l                    output the seq length on the ID line [False]
-      -rv                   reverse and complement the sequences if the gene is on minus strand [False]
+      -rv                   reverse and complement the sequences if the gene is on minus strand. Always True!
       -F                    only output full length genes,i.e., exclude the genes with '>' or '<' in their location [False]
+
 
 ## Author
 Guanliang MENG

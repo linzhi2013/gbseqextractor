@@ -32,6 +32,15 @@ Extract any CDS or rNRA or tRNA DNA sequences of genes from Genbank file.
 Seqid will be the value of '/gene=' or '/product=', if they both were not
 present, the gene will not be output!
 
+version 20201128:
+    Now we can handle compounlocation (feature location with "join")!
+
+
+Warning:
+    Each sequence in the result files corresponds to ONE feature
+in the GenBank file, I will NOT combine multiple CDS of the same gene into ONE!
+
+
 Please cite:
 Guanliang Meng, Yiyuan Li, Chentao Yang, Shanlin Liu,
 MitoZ: a toolkit for animal mitochondrial genome assembly, annotation
@@ -47,13 +56,13 @@ and visualization, Nucleic Acids Research, https://doi.org/10.1093/nar/gkz173
 
 
 	parser.add_argument("-prefix", metavar="<STR>", required=True,
-		help="prefix of output file.")
+		help="prefix of output file. required.")
 
 	parser.add_argument("-seqPrefix", metavar="<STR>", default="",
 		help="prefix of each seq id. default: None")
 
 	parser.add_argument("-types", nargs="+", default="CDS",
-		choices=["CDS", "rRNA", "tRNA", "wholeseq"],
+		choices=["CDS", "rRNA", "tRNA", "wholeseq", "gene"],
 		help="what kind of genes you want to extract? wholeseq for whole fasta seq.[%(default)s]")
 
 	parser.add_argument("-gi", default=False, action='store_true',
@@ -72,9 +81,9 @@ and visualization, Nucleic Acids Research, https://doi.org/10.1093/nar/gkz173
 	parser.add_argument("-l", default=False, action='store_true',
 		help="output the seq length on the ID line [%(default)s]")
 
-	parser.add_argument("-rv", default=False, action='store_true',
+	parser.add_argument("-rv", default=True, action='store_true',
 		help="reverse and complement the sequences if " + \
-			"the gene is on minus strand [%(default)s]")
+			"the gene is on minus strand. Always True! ")
 
 	parser.add_argument("-F", default=False, action='store_true',
 		help="only output full length genes,i.e., exclude the genes with '>' or '<' in their location [%(default)s]")
@@ -92,7 +101,10 @@ and visualization, Nucleic Acids Research, https://doi.org/10.1093/nar/gkz173
 def main():
 	args = get_para()
 
-	fh_cds = fh_rrna = fh_trrna = fh_wholeseq = ""
+	fh_gene = fh_cds = fh_rrna = fh_trna = fh_wholeseq = ""
+	if "gene" in args.types:
+		fh_gene = open(args.prefix+".gene", 'w')
+
 	if "CDS" in args.types:
 		fh_cds = open(args.prefix+".cds", 'w')
 
@@ -143,11 +155,8 @@ def main():
 			print(wholeseq_idline, file=fh_wholeseq)
 			print(rec.seq, file=fh_wholeseq)
 
-		# CDS, tRNA, rRNA
+		# CDS, tRNA, rRNA, gene
 		for fea in rec.features:
-			#print(fea.type)
-			#print(fea.location) have .start and .end attributes
-			#for qual in fea.qualifiers:
 			if fea.type in args.types:
 				if args.F:
 					if '>' in str(fea.location)  or '<' in str(fea.location):
@@ -155,12 +164,7 @@ def main():
 
 				start = fea.location.start
 				end = fea.location.end
-				strand = fea.location.strand  # is a number
-				#print(rec[start:end].seq)
-				#print(strand)
-				#print(start)
-					# fea.qualifiers['gene'] is a list!!
-					#print(fea.qualifiers['gene'][0])
+
 				gene = ""
 				product = ""
 
@@ -187,7 +191,7 @@ def main():
 					idline += "%s;%s" % (rec.id, gene)
 
 				if args.l:
-					idline += ";len=" + str(len(rec[start:end]))
+					idline += ";len=" + str(len(fea.location))
 
 				if args.p:
 					idline += ";" + str(fea.location)
@@ -202,12 +206,27 @@ def main():
 					taxonomy = taxonomy.replace("'", "")
 					idline += ";"+ taxonomy
 
-				gene_seq = rec[start:end].seq
-				if args.rv:
+				# iter each part
+				if len(fea.location.parts) > 1:
+					gene_seq = ''
+					for each_part in fea.location.parts:
+						strand = each_part.strand
+						each_part_seq = each_part.extract(rec.seq)
+						if strand == -1:
+							each_part_seq = each_part_seq.reverse_complement()
+						gene_seq += each_part_seq
+
+				else:
+					gene_seq = fea.location.extract(rec.seq)
+					strand = fea.strand
 					if strand == -1:
 						gene_seq = gene_seq.reverse_complement()
 
-				if fea.type == "CDS":
+
+				if fea.type == "gene":
+					print(idline, file=fh_gene)
+					print(gene_seq, file=fh_gene)
+				elif fea.type == "CDS":
 					print(idline, file=fh_cds)
 					print(gene_seq, file=fh_cds)
 				elif fea.type == "rRNA":
@@ -216,7 +235,9 @@ def main():
 				elif fea.type == "tRNA":
 					print(idline, file=fh_trna)
 					print(gene_seq, file=fh_trna)
-			#print(rec[start:end].seq) Biopython will automatically inorge '>' and '<'
+
+	if fh_gene:
+		fh_gene.close()
 
 	if fh_cds:
 		fh_cds.close()
@@ -224,8 +245,8 @@ def main():
 	if fh_rrna:
 		fh_rrna.close()
 
-	if fh_trrna:
-		fh_trrna.close()
+	if fh_trna:
+		fh_trna.close()
 
 	if fh_wholeseq:
 		fh_wholeseq.close()

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gbseqextractor",
-    version="0.0.2",
+    version="0.0.3",
     author='Guanliang Meng',
     author_email='linzhi2012@gmail.com',
     description="Extract any CDS or rNRA or tRNA DNA sequences of genes from Genbank file.",
