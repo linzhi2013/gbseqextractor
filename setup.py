@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="gbseqextractor",
-    version="0.0.3",
+    version="0.0.4",
     author='Guanliang Meng',
     author_email='linzhi2012@gmail.com',
     description="Extract any CDS or rNRA or tRNA DNA sequences of genes from Genbank file.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     python_requires='>=3',
-    url='https://github.com/linzhi2013',
+    url='https://github.com/linzhi2013/gbseqextractor',
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=['biopython>=1.54'],

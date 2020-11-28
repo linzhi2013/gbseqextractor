@@ -2,7 +2,8 @@
 
 # updates
 version 20201128:
-        Now we can handle compounlocation (feature location with "join")!
+        1. Now we can handle compounlocation (feature location with "join")!
+        2. We can also output the translation for each CDS.
 
 
 ## 1 Introduction
@@ -19,8 +20,8 @@ There will be a command `gbseqextractor` created under the same directory as you
 
     $ gbseqextractor
     usage: gbseqextractor.py [-h] -f <STR> -prefix <STR> [-seqPrefix <STR>]
-                         [-types {CDS,rRNA,tRNA,wholeseq,gene} [{CDS,rRNA,tRNA,wholeseq,gene} ...]] [-gi] [-p] [-t] [-s]
-                         [-l] [-rv] [-F]
+                             [-types {CDS,rRNA,tRNA,wholeseq,gene} [{CDS,rRNA,tRNA,wholeseq,gene} ...]] [-cds_translation]
+                             [-gi] [-p] [-t] [-s] [-l] [-rv] [-F]
 
     Extract any CDS or rNRA or tRNA DNA sequences of genes from Genbank file.
 
@@ -29,10 +30,7 @@ There will be a command `gbseqextractor` created under the same directory as you
 
     version 20201128:
         Now we can handle compounlocation (feature location with "join")!
-
-    Warning:
-        Each sequence in the result files corresponds to ONE feature
-    in the GenBank file, I will NOT combine multiple CDS of the same gene into ONE!
+        We can also output the translation for each CDS (retrived from '/translation=')
 
     Please cite:
     Guanliang Meng, Yiyuan Li, Chentao Yang, Shanlin Liu,
@@ -47,7 +45,11 @@ There will be a command `gbseqextractor` created under the same directory as you
       -prefix <STR>         prefix of output file. required.
       -seqPrefix <STR>      prefix of each seq id. default: None
       -types {CDS,rRNA,tRNA,wholeseq,gene} [{CDS,rRNA,tRNA,wholeseq,gene} ...]
-                            what kind of genes you want to extract? wholeseq for whole fasta seq.[CDS]
+                            what kind of genes you want to extract? wholeseq for whole fasta seq. WARNING: Each sequence in the
+                            result files corresponds to ONE feature in the GenBank file, I will NOT combine multiple CDS of the
+                            same gene into ONE! [CDS]
+      -cds_translation      Also output translated CDS (required -types CDS). The translations are retrived directly from the
+                            '/translation=' key word. [False]
       -gi                   use gi number as sequence ID instead of accession number when " gi number is present. (default:
                             accession number)
       -p                    output the position information on the ID line. Warning: the position on ID line is 0 left-most!
@@ -57,7 +59,6 @@ There will be a command `gbseqextractor` created under the same directory as you
       -l                    output the seq length on the ID line [False]
       -rv                   reverse and complement the sequences if the gene is on minus strand. Always True!
       -F                    only output full length genes,i.e., exclude the genes with '>' or '<' in their location [False]
-
 
 ## Author
 Guanliang MENG

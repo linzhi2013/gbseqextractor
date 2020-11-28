@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Copyright (c) 2017-2018 Guanliang Meng <mengguanliang@foxmail.com>.
+Copyright (c) 2017-2020 Guanliang Meng <mengguanliang@foxmail.com>.
 
 This file is part of MitoZ.
 
@@ -34,12 +34,7 @@ present, the gene will not be output!
 
 version 20201128:
     Now we can handle compounlocation (feature location with "join")!
-
-
-Warning:
-    Each sequence in the result files corresponds to ONE feature
-in the GenBank file, I will NOT combine multiple CDS of the same gene into ONE!
-
+    We can also output the translation for each CDS (retrived from '/translation=')
 
 Please cite:
 Guanliang Meng, Yiyuan Li, Chentao Yang, Shanlin Liu,
@@ -63,7 +58,10 @@ and visualization, Nucleic Acids Research, https://doi.org/10.1093/nar/gkz173
 
 	parser.add_argument("-types", nargs="+", default="CDS",
 		choices=["CDS", "rRNA", "tRNA", "wholeseq", "gene"],
-		help="what kind of genes you want to extract? wholeseq for whole fasta seq.[%(default)s]")
+		help="""what kind of genes you want to extract? wholeseq for whole fasta seq. WARNING: Each sequence in the result files corresponds to ONE feature in the GenBank file, I will NOT combine multiple CDS of the same gene into ONE! [%(default)s]""")
+
+	parser.add_argument("-cds_translation", default=False, action='store_true',
+		help="Also output translated CDS (required -types CDS). The translations are retrived directly from the '/translation=' key word. [%(default)s]")
 
 	parser.add_argument("-gi", default=False, action='store_true',
 		help='''use gi number as sequence ID instead of accession number when "
@@ -101,18 +99,21 @@ and visualization, Nucleic Acids Research, https://doi.org/10.1093/nar/gkz173
 def main():
 	args = get_para()
 
-	fh_gene = fh_cds = fh_rrna = fh_trna = fh_wholeseq = ""
+	fh_gene = fh_cds = fh_protein = fh_rrna = fh_trna = fh_wholeseq = ""
 	if "gene" in args.types:
-		fh_gene = open(args.prefix+".gene", 'w')
+		fh_gene = open(args.prefix+".gene.fasta", 'w')
 
 	if "CDS" in args.types:
-		fh_cds = open(args.prefix+".cds", 'w')
+		fh_cds = open(args.prefix+".cds.fasta", 'w')
+
+	if args.cds_translation:
+		fh_protein = open(args.prefix+".cds_translation.fasta", 'w')
 
 	if "rRNA" in args.types:
-		fh_rrna = open(args.prefix+".rrna", 'w')
+		fh_rrna = open(args.prefix+".rrna.fasta", 'w')
 
 	if "tRNA" in args.types:
-		fh_trna = open(args.prefix+".trna", 'w')
+		fh_trna = open(args.prefix+".trna.fasta", 'w')
 
 	if "wholeseq" in args.types:
 		fh_wholeseq = open(args.prefix + ".fasta", 'w')
@@ -229,6 +230,15 @@ def main():
 				elif fea.type == "CDS":
 					print(idline, file=fh_cds)
 					print(gene_seq, file=fh_cds)
+
+					if args.cds_translation and'translation' in fea.qualifiers:
+						protein_seq = fea.qualifiers['translation'][0]
+						protein_len = ';len=%s' % len(protein_seq)
+
+						idline = re.sub(r'\;len\=\d+', protein_len, idline)
+						print(idline, file=fh_protein)
+						print(protein_seq, file=fh_protein)
+
 				elif fea.type == "rRNA":
 					print(idline, file=fh_rrna)
 					print(gene_seq, file=fh_rrna)
@@ -236,11 +246,15 @@ def main():
 					print(idline, file=fh_trna)
 					print(gene_seq, file=fh_trna)
 
+
 	if fh_gene:
 		fh_gene.close()
 
 	if fh_cds:
 		fh_cds.close()
+
+	if fh_protein:
+		fh_protein.close()
 
 	if fh_rrna:
 		fh_rrna.close()
