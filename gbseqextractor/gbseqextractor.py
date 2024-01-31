@@ -211,7 +211,7 @@ def main():
 				if len(fea.location.parts) > 1:
 					gene_seq = ''
 					for each_part in fea.location.parts:
-						strand = each_part.strand
+						strand = each_part.location.strand
 						each_part_seq = each_part.extract(rec.seq)
 						if strand == -1:
 							each_part_seq = each_part_seq.reverse_complement()
@@ -219,7 +219,7 @@ def main():
 
 				else:
 					gene_seq = fea.location.extract(rec.seq)
-					strand = fea.strand
+					strand = fea.location.strand
 					if strand == -1:
 						gene_seq = gene_seq.reverse_complement()
 
